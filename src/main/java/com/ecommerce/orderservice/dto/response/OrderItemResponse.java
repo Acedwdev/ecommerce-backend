@@ -1,12 +1,13 @@
 package com.ecommerce.orderservice.dto.response;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 public class OrderItemResponse {
     private String productId;
     private String productName;
     private int quantity;
-    private double price;
+    private BigDecimal price;
     
 	public String getProductId() {
 		return productId;
@@ -26,10 +27,10 @@ public class OrderItemResponse {
 	public void setQuantity(int quantity) {
 		this.quantity = quantity;
 	}
-	public double getPrice() {
+	public BigDecimal getPrice() {
 		return price;
 	}
-	public void setPrice(double price) {
+	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
 	@Override
@@ -41,6 +42,7 @@ public class OrderItemResponse {
 	public int hashCode() {
 		return Objects.hash(price, productId, productName, quantity);
 	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -50,11 +52,9 @@ public class OrderItemResponse {
 		if (getClass() != obj.getClass())
 			return false;
 		OrderItemResponse other = (OrderItemResponse) obj;
-		return Double.doubleToLongBits(price) == Double.doubleToLongBits(other.price)
-				&& Objects.equals(productId, other.productId) && Objects.equals(productName, other.productName)
-				&& quantity == other.quantity;
+		return Objects.equals(price, other.price) && Objects.equals(productId, other.productId)
+				&& Objects.equals(productName, other.productName) && quantity == other.quantity;
 	}
-    
     
 }
 

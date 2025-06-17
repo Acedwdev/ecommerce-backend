@@ -1,5 +1,6 @@
 package com.ecommerce.orderservice.service.impl;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -14,8 +15,10 @@ import com.ecommerce.orderservice.entity.Customer;
 import com.ecommerce.orderservice.entity.Order;
 import com.ecommerce.orderservice.entity.OrderItem;
 import com.ecommerce.orderservice.entity.OrderStatus;
+import com.ecommerce.orderservice.events.OrderToPaymentEvent;
 import com.ecommerce.orderservice.repository.CustomerRepository;
 import com.ecommerce.orderservice.repository.OrderRepository;
+import com.ecommerce.orderservice.service.interfaces.KafkaProducerService;
 import com.ecommerce.orderservice.service.interfaces.OrderService;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -26,10 +29,13 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final CustomerRepository customerRepository;
+    private final KafkaProducerService kafkaProducerService;
     
-    public OrderServiceImpl(OrderRepository orderRepository, CustomerRepository customerRepository) {
+    public OrderServiceImpl(OrderRepository orderRepository, CustomerRepository customerRepository, 
+    		KafkaProducerService kafkaProducerService) {
         this.orderRepository = orderRepository;
         this.customerRepository = customerRepository;
+        this.kafkaProducerService = kafkaProducerService;
     }
 
     @Override
@@ -62,7 +68,35 @@ public class OrderServiceImpl implements OrderService {
 
         // Guardar en la BD
         Order saved = orderRepository.save(order);
+        
+        // Enviar evento a Kafka 
 
+        // Calcular total
+        BigDecimal total = request.getItems().stream()
+            .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Construir evento
+        OrderToPaymentEvent event = new OrderToPaymentEvent();
+        event.setOrderId(order.getId());
+        event.setCustomerId(order.getCustomer().getId());
+        event.setTotal(total);
+
+        List<OrderToPaymentEvent.Item> items = order.getItems().stream().map(item -> {
+            OrderToPaymentEvent.Item evtItem = new OrderToPaymentEvent.Item();
+            evtItem.setProductId(item.getProductId());
+            evtItem.setQuantity(item.getQuantity());
+            evtItem.setPrice(item.getPrice());
+            return evtItem;
+        }).toList();
+
+        event.setItems(items);
+
+        // Enviar evento a Kafka
+        kafkaProducerService.sendOrderCreatedEvent(event);
+
+        //  Fin envío evento
+        
         // Mapear respuesta
         OrderResponse response = new OrderResponse();
         response.setOrderId(saved.getId());
@@ -70,7 +104,7 @@ public class OrderServiceImpl implements OrderService {
         response.setCreatedAt(saved.getCreatedAt());
         response.setStatus(saved.getStatus());
 
-        List<OrderItemResponse> items = saved.getItems().stream().map(item -> {
+        List<OrderItemResponse> itemResponses = saved.getItems().stream().map(item -> {
             OrderItemResponse res = new OrderItemResponse();
             res.setProductId(item.getProductId());
             res.setProductName(item.getProductName());
@@ -79,7 +113,7 @@ public class OrderServiceImpl implements OrderService {
             return res;
         }).collect(Collectors.toList());
 
-        response.setItems(items);
+        response.setItems(itemResponses);
         return response;
     }
     

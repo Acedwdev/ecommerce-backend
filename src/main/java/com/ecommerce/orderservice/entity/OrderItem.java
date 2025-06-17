@@ -1,5 +1,6 @@
 package com.ecommerce.orderservice.entity;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 import jakarta.persistence.*;
@@ -17,7 +18,7 @@ public class OrderItem {
 
     private int quantity;
 
-    private double price;
+    private BigDecimal price;
 
     @ManyToOne
     @JoinColumn(name = "order_id")
@@ -27,7 +28,7 @@ public class OrderItem {
 		super();
 	}
 
-	public OrderItem(String id, String productId, String productName, int quantity, double price, Order order) {
+	public OrderItem(String id, String productId, String productName, int quantity, BigDecimal price, Order order) {
 		super();
 		this.id = id;
 		this.productId = productId;
@@ -69,11 +70,11 @@ public class OrderItem {
 		this.quantity = quantity;
 	}
 
-	public double getPrice() {
+	public BigDecimal getPrice() {
 		return price;
 	}
 
-	public void setPrice(double price) {
+	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
 
@@ -105,11 +106,11 @@ public class OrderItem {
 		if (getClass() != obj.getClass())
 			return false;
 		OrderItem other = (OrderItem) obj;
-		return Objects.equals(id, other.id) && Objects.equals(order, other.order)
-				&& Double.doubleToLongBits(price) == Double.doubleToLongBits(other.price)
+		return Objects.equals(id, other.id) && Objects.equals(order, other.order) && Objects.equals(price, other.price)
 				&& Objects.equals(productId, other.productId) && Objects.equals(productName, other.productName)
 				&& quantity == other.quantity;
 	}
+
     
     
 }

@@ -1,5 +1,6 @@
 package com.ecommerce.orderservice.dto.request;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 import jakarta.validation.constraints.*;
@@ -15,7 +16,7 @@ public class OrderItemRequest {
     private int quantity;
 
     @DecimalMin("0.01")
-    private double price;
+    private BigDecimal price;
 
 	public String getProductId() {
 		return productId;
@@ -41,11 +42,11 @@ public class OrderItemRequest {
 		this.quantity = quantity;
 	}
 
-	public double getPrice() {
+	public BigDecimal getPrice() {
 		return price;
 	}
 
-	public void setPrice(double price) {
+	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
 
@@ -69,10 +70,9 @@ public class OrderItemRequest {
 		if (getClass() != obj.getClass())
 			return false;
 		OrderItemRequest other = (OrderItemRequest) obj;
-		return Double.doubleToLongBits(price) == Double.doubleToLongBits(other.price)
-				&& Objects.equals(productId, other.productId) && Objects.equals(productName, other.productName)
-				&& quantity == other.quantity;
+		return Objects.equals(price, other.price) && Objects.equals(productId, other.productId)
+				&& Objects.equals(productName, other.productName) && quantity == other.quantity;
 	}
-    
+
     
 }
