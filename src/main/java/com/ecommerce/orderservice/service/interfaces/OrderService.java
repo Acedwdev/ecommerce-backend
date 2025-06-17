@@ -5,5 +5,8 @@ import com.ecommerce.orderservice.dto.response.OrderResponse;
 
 public interface OrderService {
     OrderResponse createOrder(CreateOrderRequest request);
+    
+    OrderResponse getOrderById(String orderId);
+
 }
 

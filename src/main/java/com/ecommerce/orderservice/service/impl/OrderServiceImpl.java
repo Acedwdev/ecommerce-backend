@@ -82,5 +82,31 @@ public class OrderServiceImpl implements OrderService {
         response.setItems(items);
         return response;
     }
+    
+    @Override
+    public OrderResponse getOrderById(String orderId) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new EntityNotFoundException("Pedido no encontrado"));
+
+        // Mapear entidad a DTO de respuesta
+        OrderResponse response = new OrderResponse();
+        response.setOrderId(order.getId());
+        response.setCustomerId(order.getCustomer().getId());
+        response.setCreatedAt(order.getCreatedAt());
+        response.setStatus(order.getStatus());
+
+        List<OrderItemResponse> items = order.getItems().stream().map(item -> {
+            OrderItemResponse itemRes = new OrderItemResponse();
+            itemRes.setProductId(item.getProductId());
+            itemRes.setProductName(item.getProductName());
+            itemRes.setQuantity(item.getQuantity());
+            itemRes.setPrice(item.getPrice());
+            return itemRes;
+        }).collect(Collectors.toList());
+
+        response.setItems(items);
+        return response;
+    }
+
 }
 
