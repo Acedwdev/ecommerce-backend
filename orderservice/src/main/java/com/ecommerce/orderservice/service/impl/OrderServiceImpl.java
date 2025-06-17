@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.ecommerce.orderservice.dto.request.CreateOrderRequest;
+import com.ecommerce.orderservice.dto.request.OrderItemRequest;
 import com.ecommerce.orderservice.dto.response.OrderItemResponse;
 import com.ecommerce.orderservice.dto.response.OrderResponse;
 import com.ecommerce.orderservice.entity.Customer;
@@ -141,6 +142,59 @@ public class OrderServiceImpl implements OrderService {
         response.setItems(items);
         return response;
     }
+    
+    @Override
+    @Transactional
+    public OrderResponse updateOrderItems(String orderId, List<OrderItemRequest> updatedItems) {
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new EntityNotFoundException("Pedido no encontrado"));
+
+        // Limpiamos los ítems actuales
+        order.getItems().clear();
+
+        // Convertimos y agregamos los nuevos ítems
+        List<OrderItem> newItems = updatedItems.stream().map(itemDto -> {
+            OrderItem item = new OrderItem();
+            item.setProductId(itemDto.getProductId());
+            item.setProductName(itemDto.getProductName());
+            item.setQuantity(itemDto.getQuantity());
+            item.setPrice(itemDto.getPrice());
+            item.setOrder(order); 
+            return item;
+        }).collect(Collectors.toList());
+
+        order.getItems().addAll(newItems);
+
+        // Guardamos y devolvemos el nuevo estado del pedido
+        Order updatedOrder = orderRepository.save(order);
+        return mapToOrderResponse(updatedOrder);
+    }
+    
+    private OrderResponse mapToOrderResponse(Order order) {
+        OrderResponse response = new OrderResponse();
+        response.setOrderId(order.getId());
+        response.setCustomerId(order.getCustomer().getId());
+        response.setStatus(order.getStatus());
+        response.setCreatedAt(order.getCreatedAt());
+
+        // Convertimos los ítems a OrderItemResponse
+        List<OrderItemResponse> items = order.getItems().stream().map(item -> {
+            OrderItemResponse itemDto = new OrderItemResponse();
+            itemDto.setProductId(item.getProductId());
+            itemDto.setProductName(item.getProductName());
+            itemDto.setQuantity(item.getQuantity());
+            itemDto.setPrice(item.getPrice());
+            return itemDto;
+        }).collect(Collectors.toList());
+
+        response.setItems(items);
+        return response;
+    }
+
 
 }
+
+
+
+
 

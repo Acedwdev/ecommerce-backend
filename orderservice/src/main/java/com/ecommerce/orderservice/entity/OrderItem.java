@@ -2,6 +2,8 @@ package com.ecommerce.orderservice.entity;
 
 import java.math.BigDecimal;
 import java.util.Objects;
+import org.hibernate.annotations.GenericGenerator;
+
 
 import jakarta.persistence.*;
 
@@ -10,6 +12,9 @@ import jakarta.persistence.*;
 public class OrderItem {
 
     @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "id", updatable = false, nullable = false)
     private String id;
 
     private String productId;
@@ -20,8 +25,8 @@ public class OrderItem {
 
     private BigDecimal price;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
 	public OrderItem() {
