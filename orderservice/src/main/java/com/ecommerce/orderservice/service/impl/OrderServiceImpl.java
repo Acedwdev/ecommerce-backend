@@ -1,15 +1,18 @@
 package com.ecommerce.orderservice.service.impl;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.ecommerce.orderservice.dto.request.CreateOrderRequest;
 import com.ecommerce.orderservice.dto.request.OrderItemRequest;
+import com.ecommerce.orderservice.dto.request.OrderSearchRequest;
 import com.ecommerce.orderservice.dto.response.OrderItemResponse;
 import com.ecommerce.orderservice.dto.response.OrderResponse;
 import com.ecommerce.orderservice.entity.Customer;
@@ -17,6 +20,7 @@ import com.ecommerce.orderservice.entity.Order;
 import com.ecommerce.orderservice.entity.OrderItem;
 import com.ecommerce.orderservice.entity.OrderStatus;
 import com.ecommerce.orderservice.events.OrderToPaymentEvent;
+import com.ecommerce.orderservice.mapper.OrderMapper;
 import com.ecommerce.orderservice.repository.CustomerRepository;
 import com.ecommerce.orderservice.repository.OrderRepository;
 import com.ecommerce.orderservice.service.interfaces.KafkaProducerService;
@@ -189,6 +193,59 @@ public class OrderServiceImpl implements OrderService {
 
         response.setItems(items);
         return response;
+    }
+    
+    @Override
+    public List<OrderResponse> getOrdersByCustomer(String customerId) {
+        List<Order> orders = orderRepository.findByCustomerId(customerId);
+        return orders.stream()
+                     .map(OrderMapper::mapToOrderResponse)
+                     .collect(Collectors.toList());
+    }
+    
+    public List<OrderResponse> searchOrders(String customerId, OrderStatus status,
+        LocalDate startDate, LocalDate endDate) {
+		Specification<Order> spec = Specification.where(null);
+		
+		if (customerId != null && !customerId.isEmpty()) {
+		spec = spec.and((root, query, cb) ->
+		cb.equal(root.get("customer").get("id"), customerId));
+		}
+		
+		if (status != null) {
+		spec = spec.and((root, query, cb) ->
+		cb.equal(root.get("status"), status));
+		}
+		
+		if (startDate != null) {
+		spec = spec.and((root, query, cb) ->
+		cb.greaterThanOrEqualTo(root.get("createdAt"), startDate.atStartOfDay()));
+		}
+		
+		if (endDate != null) {
+		spec = spec.and((root, query, cb) ->
+		cb.lessThanOrEqualTo(root.get("createdAt"), endDate.atTime(23, 59, 59)));
+		}
+		
+		List<Order> orders = orderRepository.findAll(spec);
+		return orders.stream()
+		.map(OrderMapper::mapToOrderResponse)
+		.collect(Collectors.toList());
+		}
+    
+    
+    @Override
+    @Transactional
+    public void cancelOrder(String orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
+
+        if (order.getStatus() == OrderStatus.CANCELLED) {
+            throw new RuntimeException("Order is already cancelled");
+        }
+
+        order.setStatus(OrderStatus.CANCELLED);
+        orderRepository.save(order);
     }
 
 

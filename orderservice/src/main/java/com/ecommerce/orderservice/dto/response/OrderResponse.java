@@ -13,6 +13,20 @@ public class OrderResponse {
     private OrderStatus status;
     private List<OrderItemResponse> items;
     
+	public OrderResponse() {
+		super();
+	}
+	
+	public OrderResponse(String orderId, String customerId, LocalDateTime createdAt, OrderStatus status,
+			List<OrderItemResponse> items) {
+		super();
+		this.orderId = orderId;
+		this.customerId = customerId;
+		this.createdAt = createdAt;
+		this.status = status;
+		this.items = items;
+	}
+
 	public String getOrderId() {
 		return orderId;
 	}
@@ -65,7 +79,9 @@ public class OrderResponse {
 				&& Objects.equals(items, other.items) && Objects.equals(orderId, other.orderId)
 				&& status == other.status;
 	}
-    
+	
     
 }
+
+
 

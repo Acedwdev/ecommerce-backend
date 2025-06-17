@@ -9,6 +9,18 @@ public class OrderItemResponse {
     private int quantity;
     private BigDecimal price;
     
+	public OrderItemResponse() {
+		super();
+	}
+	
+	public OrderItemResponse(String productId, String productName, int quantity, BigDecimal price) {
+		super();
+		this.productId = productId;
+		this.productName = productName;
+		this.quantity = quantity;
+		this.price = price;
+	}
+
 	public String getProductId() {
 		return productId;
 	}
