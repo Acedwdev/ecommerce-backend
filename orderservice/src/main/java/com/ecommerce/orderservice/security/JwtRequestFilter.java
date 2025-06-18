@@ -23,20 +23,23 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private JwtUtil jwtUtil;
 
     private static final List<String> EXCLUDED_PATHS = List.of(
-        "/api/v1/auth/login",
-        "/v3/api-docs",
-        "/v3/api-docs/",
-        "/v3/api-docs/**",
-        "/swagger-ui/**",
-        "/swagger-ui.html"
-    );
+    	    "/api/v1/auth/login",
+    	    "/swagger-ui.html",
+    	    "/swagger-ui/**",
+    	    "/v3/api-docs",
+    	    "/v3/api-docs/**",
+    	    "/swagger-resources/**",
+    	    "/webjars/**",
+    	    "/api-docs/**"
+    	);
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getServletPath();
-        return EXCLUDED_PATHS.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
+        String path = request.getRequestURI();
+        boolean excluded = EXCLUDED_PATHS.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
+        return excluded;
     }
 
     @Override
@@ -44,6 +47,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain)
                                     throws ServletException, IOException {
+    	
         final String authorizationHeader = request.getHeader("Authorization");
 
         String username = null;
