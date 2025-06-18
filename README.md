@@ -74,33 +74,6 @@ Sigue estos pasos para ejecutar el proyecto en tu entorno local:
 git clone https://github.com/Acedwdev/ecommerce-backend.git
 cd ecommerce-backend
 
-### 2. Levantar MySQL, Kafka y Zookeeper con Docker
 
-```bash
-docker-compose up -d
-
-verificar que los contenedores están corriendo con
-
-```bash
-docker ps
-
-### 3. Compilar y ejecutar los microservicios
-
-Ejecutar orderservice:
-
-cd orderservice
-mvn clean install
-mvn spring-boot:run
-
-El servicio estará disponible en: http://localhost:8080
-
-Ejecutar paymentservice:
-En otra terminal:
-
-cd paymentservice
-mvn clean install
-mvn spring-boot:run
-
-El servicio estará disponible en: http://localhost:8081
 
 
