@@ -53,3 +53,24 @@ ecommerce-backend/
 │
 ├── docker-compose.yml # Levanta MySQL, Kafka y Zookeeper
 └── README.md
+
+
+## ⚙️ Requisitos Previos
+
+Antes de comenzar, asegúrate de tener instalado lo siguiente en tu máquina:
+
+- [Java 17+](https://adoptopenjdk.net/)
+- [Maven](https://maven.apache.org/download.cgi)
+- [Docker](https://www.docker.com/products/docker-desktop)
+- [Git](https://git-scm.com/)
+
+## 🚀 Instalación Local
+
+Sigue estos pasos para ejecutar el proyecto en tu entorno local:
+
+### 1. Clonar el repositorio
+
+```bash
+git clone https://github.com/Acedwdev/ecommerce-backend.git
+cd ecommerce-backend
+
