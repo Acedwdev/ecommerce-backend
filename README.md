@@ -9,75 +9,91 @@ Incluye comunicación asíncrona mediante **Apache Kafka**, seguridad basada en 
 
 ---
 
-## ✅ Tabla de contenido
+## Tabla de contenido
 
-1. [Tecnologías](#tecnologías)
-2. [Estructura del proyecto](#estructura-del-proyecto)
-3. [Instalación local](#instalación-local)
-4. [Descripción de los microservicios](#descripción-de-los-microservicios)
-5. [Seguridad con JWT](#seguridad-con-jwt)
-6. [Documentación Swagger](#documentación-swagger)
-7. [Pruebas](#pruebas)
+1. [Tecnologías utilizadas](#tecnologías-utilizadas)
+2. [Arquitectura general](#arquitectura-general)
+3. [Estructura del proyecto](#estructura-del-proyecto)
+4. [Instalación local](#instalación-local)
+5. [Descripción de microservicios](#descripción-de-microservicios)
+6. [Consideraciones técnicas](#consideraciones-técnicas)
 
 ---
 
-## 🛠 Tecnologías
+## 🛠️ Tecnologías utilizadas
 
 * Java 17
 * Spring Boot 3
-* Spring Web, Spring Data JPA, Spring Security
-* Apache Kafka
-* JWT (JSON Web Token)
+* Spring Security + JWT
+* Kafka + Zookeeper
 * MySQL
-* Docker & Docker Compose
-* Swagger / OpenAPI
-* JUnit 5 & Mockito
+* Docker + Docker Compose
+* JUnit 5 + Mockito
+* Swagger/OpenAPI 3 (`springdoc-openapi`)
+
+---
+
+## 🧱 Arquitectura general
+
+Este proyecto sigue una **arquitectura de microservicios** con enfoque **hexagonal (Ports and Adapters)** de manera simplificada. Cada servicio tiene sus capas bien separadas:
+
+* `Controller` (entrada HTTP)
+* `Service` (lógica de negocio)
+* `Repository` (acceso a datos)
+* `DTOs` y `Event Models` para comunicación
+
+Además, se utiliza **Apache Kafka** como middleware para la comunicación asíncrona entre microservicios (por eventos).
 
 ---
 
 ## 📁 Estructura del proyecto
 
 ```
+📦 ecommerce-backend/
+├── orderservice/
+│   ├── controller/
+│   ├── service/
+│   ├── repository/
+│   ├── model/
+│   ├── dto/
+│   ├── config/ (Security + JWT)
+│   └── events/
+├── paymentservice/
+│   ├── controller/
+│   ├── service/
+│   ├── repository/
+│   ├── model/
+│   └── events/
 ├── docker-compose.yml
-├── orderservice
-│   ├── src
-│   ├── pom.xml
-│   └── application.properties
-├── paymentservice
-│   ├── src
-│   ├── pom.xml
-│   └── application.properties
+└── README.md
 ```
-
-* Cada microservicio es un proyecto Spring Boot independiente.
-* Kafka, MySQL y Zookeeper se levantan con Docker.
 
 ---
 
-## 💻 Instalación local
+## 🧪 Instalación local
 
-### 1. Clona el repositorio
+### 1. Clonar el proyecto
 
 ```bash
 git clone https://github.com/Acedwdev/ecommerce-backend.git
 cd ecommerce-backend
 ```
 
-### 2. Levanta los servicios con Docker
+### 2. Levantar servicios externos con Docker
 
 ```bash
 docker-compose up -d
 ```
 
-Esto levantará:
+Esto iniciará:
 
-* MySQL en puerto 3307
-* Zookeeper en 2181
-* Kafka en 9092
+* MySQL (puerto 3307)
+* Zookeeper (puerto 2181)
+* Kafka (puerto 9092)
 
-### 3. Compila y ejecuta los microservicios
+### 3. Ejecutar cada microservicio
 
-En terminales separadas:
+Desde dos terminales distintas:
 
 ```bash
 cd orderservice
@@ -91,24 +107,24 @@ cd paymentservice
 
 ---
 
-## 🧾 Descripción de los microservicios
+## 🧩 Descripción de microservicios
 
-### 🔹 `orderservice`
+### 🛒 `orderservice`
 
-* CRUD de pedidos
-* Envío de eventos `OrderToPaymentEvent` a Kafka tras crear un pedido
-* Seguridad JWT
-* Documentación Swagger
+* Crea, consulta y cancela pedidos.
+* Publica eventos `OrderToPaymentEvent` en Kafka tras la creación de un pedido.
+* Protegido con JWT y documentado con Swagger.
 
-### 🔹 `paymentservice`
+### 💳 `paymentservice`
 
-* Escucha eventos de pedidos desde Kafka
-* Procesa y almacena pagos
-* Utiliza otra base de datos separada (`payment_db`)
+* Escucha eventos `OrderToPaymentEvent` desde Kafka.
+* Registra los pagos asociados en su propia base de datos.
 
 ---
 
-## 🔐 Seguridad con JWT
+## 📘 Consideraciones técnicas
+
+### 🔐 Seguridad con JWT
 
 * Se utiliza Spring Security + JWT para proteger los endpoints
 * Endpoint público: `/api/v1/auth/login`
@@ -127,7 +143,7 @@ Authorization: Bearer <token>
 
 ---
 
-## 📖 Documentación Swagger
+### 📖 Documentación Swagger
 
 Disponible para `orderservice` en:
 
@@ -137,7 +153,7 @@ Configuración incluida en `application.properties` y `SecurityConfig` para perm
 
 ---
 
-## 🧪 Pruebas
+### 🧪 Pruebas
 
 Se incluyen pruebas para `orderservice`:
 
@@ -162,14 +178,35 @@ Ejecutar pruebas:
 
 ---
 
+## 🎯 Principios y patrones utilizados
+
+### ✅ Arquitectura
+
+* Microservicios
+* Comunicación asíncrona vía Kafka
+
+### ✅ Patrones de diseño
+
+* **DTO**: comunicación entre capas
+* **Service Layer**: lógica central del negocio
+* **Event-Driven**: integración entre microservicios con Kafka
+* **Factory pattern** (en tests al construir objetos)
+
+### ✅ Principios SOLID aplicados
+
+* **SRP**: cada clase tiene una única responsabilidad (ej. `JwtRequestFilter`, `OrderServiceImpl`, `OrderController`).
+* **OCP**: código preparado para extensión sin modificar.
+* **DIP**: uso de interfaces e inyección de dependencias (`@Autowired`, `@MockBean`).
+* **LSP**: implementaciones pueden sustituir a interfaces sin romper comportamiento.
+* **ISP**: interfaces pequeñas como `OrderService`.
+
+---
+
 ## 📝 Autor
 
 Proyecto desarrollado como ejercicio de arquitectura de microservicios con Spring Boot.
 
 GitHub: [Acedwdev](https://github.com/Acedwdev)
-
----
-
 
 
 
