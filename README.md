@@ -74,6 +74,10 @@ Sigue estos pasos para ejecutar el proyecto en tu entorno local:
 git clone https://github.com/Acedwdev/ecommerce-backend.git
 cd ecommerce-backend
 
+### 2. Levantar MySQL, Kafka y Zookeeper con Docker
+
+```bash
+docker-compose up -d
 
 
 
