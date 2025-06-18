@@ -111,7 +111,7 @@ cd paymentservice
 
 ### 🛒 `orderservice`
 
-* Crea, consulta y cancela pedidos.
+* Crea, consulta, actualiza y cancela pedidos.
 * Publica eventos `OrderToPaymentEvent` en Kafka tras la creación de un pedido.
 * Protegido con JWT y documentado con Swagger.
 
