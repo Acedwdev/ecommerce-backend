@@ -35,3 +35,21 @@ El proyecto está preparado para ejecutarse localmente utilizando `Docker` y `do
 - Docker + Docker Compose
 - JUnit 5 + Mockito (pruebas unitarias e integración)
 
+## 📁 Estructura del Proyecto
+
+El repositorio contiene dos microservicios independientes dentro de una misma raíz:
+
+ecommerce-backend/
+│
+├── orderservice/ # Microservicio para gestión de pedidos
+│ ├── src/ # Código fuente Java
+│ ├── pom.xml # Dependencias y configuración Maven
+│ └── application.properties # Configuración (MySQL, Kafka, JWT, Swagger)
+│
+├── paymentservice/ # Microservicio para procesamiento de pagos
+│ ├── src/ # Código fuente Java
+│ ├── pom.xml # Dependencias y configuración Maven
+│ └── application.properties # Configuración (MySQL, Kafka)
+│
+├── docker-compose.yml # Levanta MySQL, Kafka y Zookeeper
+└── README.md
