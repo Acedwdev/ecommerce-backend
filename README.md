@@ -107,6 +107,25 @@ cd paymentservice
 
 ---
 
+## 🛢️ Conexión a la base de datos
+
+Una vez que Docker esté corriendo, puedes conectarte al contenedor de MySQL para hacer consultas o inserts:
+
+```bash
+docker exec -it mysql_orderservice mysql -uorders_user -porders_password orders_db
+```
+
+### Insertar cliente para pruebas
+
+Para poder usar los endpoints de creación de pedidos, es necesario tener clientes registrados. Puedes usar este comando en la base de datos:
+
+```sql
+INSERT INTO customers (id, name, email)
+VALUES ('abc123', 'Juan Perez', 'juan@mail.com');
+```
+
+---
+
 ## 🧩 Descripción de microservicios
 
 ### 🛒 `orderservice`
@@ -207,6 +226,9 @@ Ejecutar pruebas:
 Proyecto desarrollado como ejercicio de arquitectura de microservicios con Spring Boot.
 
 GitHub: [Acedwdev](https://github.com/Acedwdev)
+
+
+
 
 
 
