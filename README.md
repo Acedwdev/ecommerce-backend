@@ -162,7 +162,7 @@ Ejecutar pruebas:
 
 ---
 
-## 📝 Autores
+## 📝 Autor
 
 Proyecto desarrollado como ejercicio de arquitectura de microservicios con Spring Boot.
 
