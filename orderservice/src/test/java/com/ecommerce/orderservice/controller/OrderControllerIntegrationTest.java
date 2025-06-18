@@ -5,13 +5,19 @@ import com.ecommerce.orderservice.dto.request.OrderItemRequest;
 import com.ecommerce.orderservice.entity.OrderStatus;
 import com.ecommerce.orderservice.entity.Customer;
 import com.ecommerce.orderservice.repository.CustomerRepository;
+import com.ecommerce.orderservice.repository.OrderRepository;
+import com.ecommerce.orderservice.service.interfaces.KafkaProducerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.transaction.Transactional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -29,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @TestPropertySource(locations = "classpath:application-test.properties")
+@Transactional
 class OrderControllerIntegrationTest {
 
     @Autowired
@@ -39,12 +46,20 @@ class OrderControllerIntegrationTest {
 
     @Autowired
     private CustomerRepository customerRepository;
+    
+    @Autowired 
+    private OrderRepository orderRepository;
+    
+    @MockBean
+    private KafkaProducerService kafkaProducerService;
+
 
     @BeforeEach
     void setup() {
+        orderRepository.deleteAll(); 
         customerRepository.deleteAll();
 
-        // Carga todos los clientes necesarios para los tests
+        // Clientes necesarios
         customerRepository.saveAll(List.of(
                 new Customer("customer123", "Cliente Test", "cliente@test.com"),
                 new Customer("customerX", "Cliente X", "clienteX@test.com"),
@@ -55,6 +70,8 @@ class OrderControllerIntegrationTest {
     @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
     void createOrder_ShouldReturnCreated() throws Exception {
+    	Mockito.doNothing().when(kafkaProducerService).sendOrderCreatedEvent(Mockito.any());
+
         CreateOrderRequest request = new CreateOrderRequest();
         request.setCustomerId("customer123");
 
@@ -79,7 +96,7 @@ class OrderControllerIntegrationTest {
     void getOrderById_ShouldReturnOk() throws Exception {
         // Crear pedido primero
         CreateOrderRequest request = new CreateOrderRequest();
-        request.setCustomerId("customerX");
+        request.setCustomerId("customer123");
 
         OrderItemRequest item = new OrderItemRequest();
         item.setProductId("productX");
@@ -97,12 +114,12 @@ class OrderControllerIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        String orderId = objectMapper.readTree(response).get("id").asText();
+        String orderId = objectMapper.readTree(response).get("orderId").asText();
 
-        mockMvc.perform(get("/api/v1/orders/" + orderId))
+        mockMvc.perform(get("/api/v1/orders/{id}", orderId))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(orderId));
+                .andExpect(jsonPath("$.orderId").value(orderId));
     }
 
     @Test
@@ -118,7 +135,7 @@ class OrderControllerIntegrationTest {
     @WithMockUser(username = "admin", roles = {"ADMIN"})
     void cancelOrder_ShouldReturnNoContent() throws Exception {
         CreateOrderRequest request = new CreateOrderRequest();
-        request.setCustomerId("cancelTest");
+        request.setCustomerId("customer123");
 
         OrderItemRequest item = new OrderItemRequest();
         item.setProductId("product1");
@@ -136,10 +153,11 @@ class OrderControllerIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        String orderId = objectMapper.readTree(response).get("id").asText();
+        String orderId = objectMapper.readTree(response).get("orderId").asText();
 
-        mockMvc.perform(delete("/api/v1/orders/" + orderId))
+        mockMvc.perform(delete("/api/v1/orders/{id}", orderId))
                 .andDo(print())
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNoContent()); 
     }
+
 }
