@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import com.ecommerce.orderservice.dto.request.CreateOrderRequest;
 import com.ecommerce.orderservice.dto.request.OrderItemRequest;
-import com.ecommerce.orderservice.dto.request.OrderSearchRequest;
 import com.ecommerce.orderservice.dto.response.OrderItemResponse;
 import com.ecommerce.orderservice.dto.response.OrderResponse;
 import com.ecommerce.orderservice.entity.Customer;

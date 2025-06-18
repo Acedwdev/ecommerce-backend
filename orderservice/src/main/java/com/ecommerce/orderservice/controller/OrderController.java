@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ecommerce.orderservice.dto.request.CreateOrderRequest;
-import com.ecommerce.orderservice.dto.request.OrderSearchRequest;
 import com.ecommerce.orderservice.dto.request.UpdateOrderItemsRequest;
 import com.ecommerce.orderservice.dto.response.OrderResponse;
 import com.ecommerce.orderservice.entity.OrderStatus;
@@ -74,13 +73,10 @@ public class OrderController {
 	    return ResponseEntity.ok(orders);
 	}
 	
-	
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> cancelOrder(@PathVariable String id) {
 	    orderService.cancelOrder(id);
 	    return ResponseEntity.noContent().build(); // 204 No Content
 	}
-
-
 
 }

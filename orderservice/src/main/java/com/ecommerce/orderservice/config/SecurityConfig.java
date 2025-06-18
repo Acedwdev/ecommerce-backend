@@ -14,6 +14,7 @@ import org.springframework.security.config.annotation.web.configuration.*;
 
 @Configuration
 @EnableWebSecurity
+@Profile("!test")
 public class SecurityConfig {
 
     @Autowired
@@ -23,7 +24,15 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/auth/login").permitAll()
+                .requestMatchers(
+                        "/api/v1/auth/login",
+                        "/v3/api-docs",
+                        "/v3/api-docs/",
+                        "/v3/api-docs/**",
+                        "/v3/api-docs/**",        // OpenAPI JSON
+                        "/swagger-ui/**",         // Swagger UI resources
+                        "/swagger-ui.html"        // Entry point
+                		).permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

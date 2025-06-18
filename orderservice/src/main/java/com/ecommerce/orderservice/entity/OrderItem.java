@@ -115,7 +115,5 @@ public class OrderItem {
 				&& Objects.equals(productId, other.productId) && Objects.equals(productName, other.productName)
 				&& quantity == other.quantity;
 	}
-
-    
     
 }
